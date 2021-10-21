@@ -7,32 +7,37 @@ A demo application with the following Google Cloud Products.
 - [Google Kubernetes Engine (GKE)](https://cloud.google.com/kubernetes-engine)
 
 ### Architecture
-![architecture_diagram](https://storage.googleapis.com/handson-images/mci-asm-demo.png)
+![architecture_diagram](https://storage.googleapis.com/handson-images/mci-asm-architecture.png)
+
+### API resource model
+![resource model](https://storage.googleapis.com/handson-images/mci-asm-resource-model.png)
 
 ### 0. Prerequisite
 You must have a couple of GKE clusters which has ASM installed.  
 Each cluster can be located at any Google Cloud region.  
-The following demo procedure is based upon the following clusters.
+The following demo procedure uses clusters below.
 - asm-cluster-01 at asia-northeast1 region (Tokyo)
-- asm-cluster-02 at asia-norhteast2 region (OSaka)
+- asm-cluster-02 at asia-norhteast2 region (Osaaka)
 
 For ASM installation, please check [ASM doc](https://cloud.google.com/service-mesh/docs/unified-install/managed-service-mesh).
 
 Also don't forget to git clone this repo in the beginning.
 ```shell
 ❯ git clone git@github.com:kazshinohara/asm-demo.git
-❯ cd ./asm-demo
+❯ cd ./asm-demo/mci-asm
 ```
 
 ### 1. Set up ASM environment
 
-#### 1-1. Set up a namespace for workload
+#### 1-1. Set up a namespace for sample app
 Create a namespace "asm-test" for the sample app.
 ```shell
 ❯ k apply -f namespace.yaml
 namespace/asm-test created
 ```
-Set a label to the newly created namespace for sidecar injection
+Set a label to "asm-test" namespace for sidecar injection
+In this demo, you use regular channel of MCP.
+For ASM MCP, please check [ASM doc](https://cloud.google.com/service-mesh/docs/release-channels-managed-service-mesh).
 ```shell
 ❯ k label namespace asm-test istio-injection- istio.io/rev=asm-managed --overwrite
 label "istio-injection" not found.
@@ -42,9 +47,9 @@ namespace/asm-test labeled
 #### 1-2. istio-ingressgateway setup
 By default, ASM does not have istio-ingressgateway for inbound traffic.  
 You need to create it by yourself.
-In this demo, you use istio-system namespace to host your istio-ingressgateway.
+In this demo, you use "istio-system" namespace to host your istio-ingressgateway.
 
-Set a label to istio-system namespace.
+Set a label to "istio-system" namespace.
 ```shell
 ❯ k label namespace istio-system istio-injection- istio.io/rev=asm-managed --overwrite
 label "istio-injection" not found.
@@ -73,7 +78,7 @@ poddisruptionbudget.policy/istio-ingressgateway created
 
 ### 2. Set up MCI
 
-For detail procedure, please check [MCI doc](https://cloud.google.com/kubernetes-engine/docs/how-to/multi-cluster-ingress-setup)
+For detail procedure, please check [MCI doc](https://cloud.google.com/kubernetes-engine/docs/how-to/multi-cluster-ingress-setup).
 
 Note: This demo uses MCI standalone (not Anthos).
 
@@ -81,7 +86,7 @@ Note: This demo uses MCI standalone (not Anthos).
 ```shell
 ❯ gcloud services enable \                                                                         
     multiclusteringress.googleapis.com \
-    gkehub.googleapis.com \
+    gkehub.googleapis.com
 ```
 #### 2-2. [optional] Register your clusters to Fleets
 If you've already installed ASM to your clusters, you can skip the following steps.
@@ -96,7 +101,7 @@ gcloud container hub memberships register asm-cluster-02 \
     --enable-workload-identity
 ```
 
-#### 2-3. Set up a config cluster for MCI
+#### 2-3. Enable MCI and specify a config cluster
 In this demo, you use asm-cluster-01 as a config cluster for MCI.
 ```shell
 gcloud beta container hub ingress enable \
@@ -104,10 +109,21 @@ gcloud beta container hub ingress enable \
 ```
 
 #### 2-4. Create MCI
-Note1: In advanced to this step, you have to reserve a global address for VIP of MCI.  
-Note2: Also you have to configure your DNS server with your FQDN and the reserved address. 
-In this demo, you use "mci1.gcpx.org" as FQDN for the sample app.
+In advanced to this step, please make sure the following points.  
 
+Note 1:  
+you have to reserve a static external address(global) for VIP of MCI.  For the detailed procedure is 
+[here](https://cloud.google.com/compute/docs/ip-addresses/reserve-static-external-ip-address).  
+
+Note 2:  
+Also you might have to configure your DNS server with your FQDN and the reserved address. 
+In this demo, you use "mci1.gcpx.org" as FQDN for the sample app.  
+If you don't do this step, please specify Host header in "4.Test"  
+
+Note 3:  
+Please update mci.yaml with your IP and FQDN accordingly.
+
+Then let's apply MCI manifests.
 ```shell
 ❯ k apply -f mci.yaml
 ```
