@@ -1,0 +1,48 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: whereami-gateway
+  namespace: asm-test
+spec:
+  selector:
+    app: istio-ingressgateway
+    istio: ingressgateway
+  servers:
+    - port:
+        number: 80
+        name: http
+        protocol: HTTP
+      hosts:
+        - "mci1.gcpx.org"
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: whereami
+  namespace: asm-test
+spec:
+  hosts:
+    - "mci1.gcpx.org"
+  gateways:
+    - whereami-gateway
+  http:
+    - match:
+        - uri:
+            exact: /
+        - uri:
+            exact: /kind
+        - uri:
+            exact: /version
+        - uri:
+            exact: /region
+        - uri:
+            exact: /cluster
+        - uri:
+            exact: /hostname
+        - uri:
+            prefix: /headers
+      route:
+        - destination:
+            host: whereami
+            port:
+              number: 8080

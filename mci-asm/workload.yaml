@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: whereami
+  namespace: asm-test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: whereami
+  template:
+    metadata:
+      labels:
+        app: whereami
+    spec:
+      containers:
+        - image: asia-northeast1-docker.pkg.dev/kzs-sandbox/public/whereami:v1
+          imagePullPolicy: Always
+          name: whereami
+          ports:
+            - containerPort: 8080
+          env:
+            - name: PORT
+              value: "8080"
+            - name: VERSION
+              value: "v1"
+            - name: KIND
+              value: "test"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: whereami
+  namespace: asm-test
+spec:
+  ports:
+    - port: 8080
+      targetPort: 8080
+      protocol: TCP
+  selector:
+    app: whereami
+  type: ClusterIP

@@ -1,0 +1,54 @@
+apiVersion: networking.gke.io/v1
+kind: MultiClusterIngress
+metadata:
+ name: istio-ingressgateway-mci
+ namespace: istio-system
+ annotations:
+   networking.gke.io/static-ip: 34.120.219.182
+spec:
+  template:
+    spec:
+      backend:
+        serviceName: istio-ingressgateway-mcs
+        servicePort: 80
+---
+apiVersion: networking.gke.io/v1
+kind: MultiClusterService
+metadata:
+  name: istio-ingressgateway-mcs
+  namespace: istio-system
+  annotations:
+    beta.cloud.google.com/backend-config: '{"ports": {"80":"istio-ingressgateway-hc"}}'
+  labels:
+    app: istio-ingressgateway
+    istio: ingressgateway
+spec:
+  template:
+    spec:
+      selector:
+        istio: ingressgateway
+        app: istio-ingressgateway
+      ports:
+        - name: status-port
+          port: 15021
+          protocol: TCP
+          targetPort: 15021
+        - name: http
+          port: 80
+        - name: https
+          port: 443
+---
+apiVersion: cloud.google.com/v1beta1
+kind: BackendConfig
+metadata:
+  name: istio-ingressgateway-hc
+  namespace: istio-system
+spec:
+  healthCheck:
+    checkIntervalSec: 3
+    timeoutSec: 2
+    healthyThreshold: 1
+    unhealthyThreshold: 6
+    type: HTTP
+    port: 15021
+    requestPath: /healthz/ready
