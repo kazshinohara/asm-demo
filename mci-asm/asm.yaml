@@ -40,6 +40,8 @@ spec:
         - uri:
             exact: /hostname
         - uri:
+            exact: /sourceip
+        - uri:
             prefix: /headers
       route:
         - destination:
