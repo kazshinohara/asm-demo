@@ -28,7 +28,7 @@ Also don't forget to git clone this repo in the beginning.
 ```
 
 ### 4. Set up ASM environment
-<font color="Red">You must do the following steps in both clusters</font>
+***Note: You must do the following steps in both clusters***
 
 #### 4-1. Set up a namespace for sample app
 Create a namespace "asm-test" for the sample app.
@@ -110,21 +110,17 @@ gcloud beta container hub ingress enable \
 ```
 
 #### 5-4. Create MCI
-<font color="Red">You must do this step in only asm-cluster-01</font>  
+***Note: You must do this step in only asm-cluster-01***
 
 In advanced to this step, please make sure the following points.  
 
-Note 1:  
-you have to reserve a static external address(global) for VIP of MCI.  For the detailed procedure is 
+1. You have to reserve a static external address(global) for VIP of MCI.  For the detailed procedure is 
 [here](https://cloud.google.com/compute/docs/ip-addresses/reserve-static-external-ip-address).  
 
-Note 2:  
-Also you might have to configure your DNS server with your FQDN and the reserved address. 
-In this demo, you use "mci1.gcpx.org" as FQDN for the sample app.  
-If you don't do this step, please specify Host header in "4.Test"  
+2. Also you might have to configure your DNS server with your FQDN and the reserved address.   
+   If you don't do this step, please specify Host header in "4.Test"  
 
-Note 3:  
-Please update mci.yaml with your IP and FQDN accordingly.
+3.  Please update mci.yaml with your IP(34.120.219.*** -> YOUR IP) and FQDN(mci1.gcpx.org -> YOUR FQDN) accordingly.
 
 Then let's apply MCI manifests.
 ```shell
@@ -132,7 +128,7 @@ Then let's apply MCI manifests.
 ```
 
 ### 6. Apply ASM Configurations
-<font color="Red">You must do the following steps in both clusters</font>
+***Note: You must do the following steps in both clusters***
 #### 6-1. Deploy the sample app
 In this demo, you use [whereami](https://github.com/kazshinohara/whereami) as a sample app.
 ```shell
