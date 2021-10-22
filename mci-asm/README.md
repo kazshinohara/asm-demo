@@ -1,18 +1,18 @@
 ## Multi-cluster Ingress and Anthos Service Mesh demo
 
-A demo application with the following Google Cloud Products.
+A demo with the following Google Cloud Products.
 
 - [Multi Cluster Ingress (MCI)](https://cloud.google.com/kubernetes-engine/docs/concepts/multi-cluster-ingress)
 - [Anthos Service Mesh (ASM)](https://cloud.google.com/anthos/service-mesh)
 - [Google Kubernetes Engine (GKE)](https://cloud.google.com/kubernetes-engine)
 
-### Architecture
-![architecture_diagram](https://storage.googleapis.com/handson-images/mci-asm-architecture.png)
+### 1. Architecture
+<img width="800" alt="Architecture" src="https://storage.googleapis.com/handson-images/mci-asm-architecture.png">
 
-### API resource model
-![resource model](https://storage.googleapis.com/handson-images/mci-asm-resource-model.png)
+### 2. Resource relation
+<img width="800" alt="resource relation" src="https://storage.googleapis.com/handson-images/mci-asm-resource-model.png">
 
-### 0. Prerequisite
+### 3. Prerequisite
 You must have a couple of GKE clusters which has ASM installed.  
 Each cluster can be located at any Google Cloud region.  
 The following demo procedure uses clusters below.
@@ -27,9 +27,10 @@ Also don't forget to git clone this repo in the beginning.
 ❯ cd ./asm-demo/mci-asm
 ```
 
-### 1. Set up ASM environment
+### 4. Set up ASM environment
+<font color="Red">You must do the following steps in both clusters</font>
 
-#### 1-1. Set up a namespace for sample app
+#### 4-1. Set up a namespace for sample app
 Create a namespace "asm-test" for the sample app.
 ```shell
 ❯ k apply -f namespace.yaml
@@ -44,7 +45,7 @@ label "istio-injection" not found.
 namespace/asm-test labeled
 ```
 
-#### 1-2. istio-ingressgateway setup
+#### 4-2. istio-ingressgateway setup
 By default, ASM does not have istio-ingressgateway for inbound traffic.  
 You need to create it by yourself.
 In this demo, you use "istio-system" namespace to host your istio-ingressgateway.
@@ -76,19 +77,19 @@ deployment.apps/istio-ingressgateway created
 poddisruptionbudget.policy/istio-ingressgateway created
 ```
 
-### 2. Set up MCI
+### 5. Set up MCI
 
 For detail procedure, please check [MCI doc](https://cloud.google.com/kubernetes-engine/docs/how-to/multi-cluster-ingress-setup).
 
 Note: This demo uses MCI standalone (not Anthos).
 
-#### 2-1. Enable APIs
+#### 5-1. Enable APIs
 ```shell
 ❯ gcloud services enable \                                                                         
     multiclusteringress.googleapis.com \
     gkehub.googleapis.com
 ```
-#### 2-2. [optional] Register your clusters to Fleets
+#### 5-2. [optional] Register your clusters to Fleets
 If you've already installed ASM to your clusters, you can skip the following steps.
 ```shell
 gcloud container hub memberships register asm-cluster-01 \
@@ -101,14 +102,16 @@ gcloud container hub memberships register asm-cluster-02 \
     --enable-workload-identity
 ```
 
-#### 2-3. Enable MCI and specify a config cluster
+#### 5-3. Enable MCI and specify a config cluster
 In this demo, you use asm-cluster-01 as a config cluster for MCI.
 ```shell
 gcloud beta container hub ingress enable \
   --config-membership=asm-cluster-01
 ```
 
-#### 2-4. Create MCI
+#### 5-4. Create MCI
+<font color="Red">You must do this step in only asm-cluster-01</font>  
+
 In advanced to this step, please make sure the following points.  
 
 Note 1:  
@@ -128,8 +131,9 @@ Then let's apply MCI manifests.
 ❯ k apply -f mci.yaml
 ```
 
-### 3. Apply ASM Configuration
-#### 3-1. Deploy the sample app
+### 6. Apply ASM Configurations
+<font color="Red">You must do the following steps in both clusters</font>
+#### 6-1. Deploy the sample app
 In this demo, you use [whereami](https://github.com/kazshinohara/whereami) as a sample app.
 ```shell
 ❯ k apply -f workload.yaml
@@ -137,13 +141,13 @@ deployment.apps/whereami created
 service/whereami created
 ```
 
-#### 3-2. Apply ASM configuration
+#### 6-2. Apply ASM configuration
 ```shell
 ❯ k apply -f asm.yaml
 virtualservice.networking.istio.io/whereami configured
 ```
 
-### 4. Test
+### 7. Test
 You could see your traffic appropriately routes to Tokyo & Osaka GKE cluster.  
 
 From Tokyo client
@@ -173,3 +177,5 @@ From Osaka client
   "region": "asia-northeast2"
 }
 ```
+
+If you have time to spare, let's see what's happen if you changed istio-ingressgateway replicas of asm-cluster-01 to Zero.
