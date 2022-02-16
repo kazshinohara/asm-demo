@@ -20,7 +20,7 @@
 # vendor/
 
 grpc-asm/istio-ingressgateway/generated-tls-cert/*
-bkup/*
+grpc-asm/bkup/*
 
 
 
