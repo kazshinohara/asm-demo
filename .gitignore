@@ -19,4 +19,8 @@
 # Dependency directories (remove the comment below to include it)
 # vendor/
 
+grpc-asm/istio-ingressgateway/generated-tls-cert/*
+bkup/*
+
+
 

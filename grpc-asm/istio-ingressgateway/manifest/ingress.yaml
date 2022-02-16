@@ -1,0 +1,39 @@
+apiVersion: cloud.google.com/v1beta1
+kind: BackendConfig
+metadata:
+  name: istio-ingressgateway-hc
+  namespace: asm-gateway
+spec:
+  timeoutSec: 2147483647
+  healthCheck:
+    checkIntervalSec: 3
+    timeoutSec: 2
+    healthyThreshold: 1
+    unhealthyThreshold: 6
+    type: HTTP
+    port: 15021
+    requestPath: /healthz/ready
+---
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: asm-cert
+  namespace: asm-gateway
+spec:
+  domains:
+    - asm.gcpx.org
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: istio-ingressgateway-ingress
+  namespace: asm-gateway
+  annotations:
+    kubernetes.io/ingress.global-static-ip-name: asm-ingress-ip
+    networking.gke.io/managed-certificates: asm-cert
+spec:
+  defaultBackend:
+    service:
+      name: istio-ingressgateway
+      port:
+        number: 443
